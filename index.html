@@ -5,10 +5,6 @@
 <title>Late Fee Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Flatpickr (Date Picker) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -16,7 +12,7 @@
 :root{
   --blue:#0b3c5d;
   --yellow:#f4c430;
-  --light:#f6f8fb;
+  --light:#f2f6fb;
 }
 
 body{
@@ -25,128 +21,158 @@ body{
   padding:20px;
 }
 
+/* ================= DESKTOP BASE (UNCHANGED) ================= */
+
 .card{
   max-width:760px;
   margin:auto;
   background:#fff;
-  padding:22px;
+  padding:25px;
   border-radius:12px;
-  box-shadow:0 6px 16px rgba(0,0,0,.12);
-  border-top:6px solid var(--yellow);
+  box-shadow:0 6px 16px rgba(0,0,0,.15);
+  border-top:8px solid var(--yellow);
 }
 
 h1{
   margin:0;
   color:var(--blue);
   text-align:center;
-  font-size:26px;
 }
 
 .sub{
   text-align:center;
   font-size:12px;
-  color:#666;
-  margin-bottom:20px;
+  color:#555;
+  margin-bottom:25px;
 }
 
 label{
-  font-size:13px;
-  font-weight:600;
-  color:#2c3e50;
+  font-weight:bold;
   margin-top:14px;
   display:block;
+  color:var(--blue);
 }
 
-input, select{
-  width:50%;
-  padding:4px 8px;
-  font-size:13px;
-  border:1px solid #bbb;
-  border-radius:6px;
-  height:32px;
+input,select{
+  width:100%;
+  padding:10px;
   margin-top:6px;
-  box-sizing:border-box;
+  font-size:15px;
+  border:1px solid #aaa;
+  border-radius:6px;
 }
 
 .output{
-  margin-top:28px;
-  padding:18px;
+  margin-top:30px;
+  padding:20px;
   background:#fffbe6;
   border-radius:10px;
-  border:1.5px solid var(--yellow);
+  border:2px solid var(--yellow);
   display:none;
 }
 
 .output-title{
   text-align:center;
-  font-size:17px;
   font-weight:bold;
   color:var(--blue);
-  margin-bottom:14px;
+  margin-bottom:15px;
+  font-size:18px;
 }
 
 .row{
   display:flex;
   justify-content:space-between;
-  padding:8px 0;
-  border-bottom:1px dashed #ddd;
+  padding:9px 0;
+  border-bottom:1px dashed #ccc;
 }
 
-/* Dates & late period */
 .value{
-  font-size:15px;
+  font-size:16px;
   font-weight:bold;
-  line-height:1.5;
 }
 
-/* Financial values */
 .big-value{
-  font-size:18px;
+  font-size:20px;
   font-weight:bold;
-  line-height:1.6;
 }
 
-/* Late fee highlight */
 .latefee{
-  color:#8b0000;
+  color:#b30000;
   font-weight:bold;
 }
 
 .btn{
-  margin-top:14px;
-  padding:8px 16px;
+  margin-top:15px;
+  padding:10px 15px;
   background:var(--blue);
   color:#fff;
   border:none;
   border-radius:6px;
-  font-size:14px;
   cursor:pointer;
 }
 
+/* ================= MOBILE UI (APP STYLE) ================= */
+
 @media (max-width:600px){
-  input, select{
-    width:50%;
-    height:34px;
+
+  label{
+    color:#f4c430;
+    font-weight:700;
     font-size:14px;
   }
 
-  .value{ font-size:14px; }
-  .big-value{ font-size:16px; }
+  input, select{
+    width:100%;
+    height:50px;
+    font-size:16px;
+    border-radius:12px;
+    border:none;
+    padding:14px;
+    background:#ffffff;
+    box-shadow:0 8px 18px rgba(0,0,0,0.12);
+  }
+
+  input[type="date"]{
+    appearance:none;
+    -webkit-appearance:none;
+  }
+
+  .currency-input{
+    position:relative;
+  }
+
+  .currency-prefix{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    font-weight:600;
+    color:#777;
+    pointer-events:none;
+  }
+
+  .currency-input input{
+    padding-left:48px;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div class="card">
 
 <h1>Late Fee Calculator</h1>
 <div class="sub">Prepared by Subash Paudel for knowledge purpose</div>
 
 <label>Due Date (FUP)</label>
-<input type="text" id="fup" placeholder="DD-MMM-YYYY">
+<input type="date" id="fup">
 
 <label>Premium Amount</label>
-<input type="number" id="premium">
+<div class="currency-input">
+  <span class="currency-prefix">Rs.</span>
+  <input type="number" id="premium">
+</div>
 
 <label>Mode</label>
 <select id="mode">
@@ -157,7 +183,7 @@ input, select{
 </select>
 
 <label>Calculation Date (Optional)</label>
-<input type="text" id="caldate" placeholder="DD-MMM-YYYY">
+<input type="date" id="caldate">
 
 <div class="output" id="outputBox">
   <div class="output-title">Premium & Late Fee O/S Particulars</div>
@@ -179,18 +205,17 @@ input, select{
 </div>
 
 <script>
-flatpickr("#fup",{dateFormat:"d-M-Y",allowInput:true});
-flatpickr("#caldate",{dateFormat:"d-M-Y",allowInput:true});
-
 const { jsPDF } = window.jspdf;
 
 function fmt(d){
-  return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).replace(/ /g,"-");
+  let x=new Date(d);
+  return String(x.getDate()).padStart(2,"0")+"-"+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][x.getMonth()]+"-"+x.getFullYear();
 }
 
-function addMonths(date, m){
-  let d=new Date(date); let day=d.getDate();
-  d.setMonth(d.getMonth()+m);
+function addMonths(date, months){
+  let d=new Date(date);
+  let day=d.getDate();
+  d.setMonth(d.getMonth()+months);
   if(d.getDate()<day) d.setDate(0);
   return d;
 }
@@ -199,16 +224,36 @@ function monthsRounded15(start,end){
   if(end<start) return -1;
   let m=(end.getFullYear()-start.getFullYear())*12+(end.getMonth()-start.getMonth());
   let anchor=addMonths(start,m);
-  return m+((end-anchor)/86400000>=15?1:0);
+  let days=(end-anchor)/86400000;
+  return m+(days>=15?1:0);
+}
+
+function latePeriodText(a,b){
+  let d1=new Date(a), d2=new Date(b);
+  let y=d2.getFullYear()-d1.getFullYear();
+  let m=d2.getMonth()-d1.getMonth();
+  let d=d2.getDate()-d1.getDate();
+  if(d<0){ m--; d+=new Date(d2.getFullYear(),d2.getMonth(),0).getDate(); }
+  if(m<0){ y--; m+=12; }
+  return `${y} Years ${m} Months ${d} Days`;
+}
+
+function validTill(fup,cal){
+  let md=cal.getDate()-fup.getDate();
+  if(md<0) md+=new Date(cal.getFullYear(),cal.getMonth(),0).getDate();
+  let base=(md>14)?addMonths(cal,1):new Date(cal);
+  base.setDate(base.getDate()+(14-md));
+  return base;
 }
 
 function calc(){
   let fup=document.getElementById("fup").value;
-  let premium=+document.getElementById("premium").value;
-  let interval=+document.getElementById("mode").value;
+  let premium=Number(document.getElementById("premium").value);
+  let interval=Number(document.getElementById("mode").value);
   let cal=document.getElementById("caldate").value;
 
-  if(!fup||!premium) return;
+  if(!fup || !premium) return;
+
   document.getElementById("outputBox").style.display="block";
 
   fup=new Date(fup);
@@ -216,10 +261,10 @@ function calc(){
 
   o_fup.innerText=fmt(fup);
   o_cal.innerText=fmt(cal);
-  o_period.innerText=
-    `${cal.getFullYear()-fup.getFullYear()} Years ${cal.getMonth()-fup.getMonth()+12*(cal.getMonth()<fup.getMonth()? -1:0)} Months ${cal.getDate()-fup.getDate()}`;
+  o_period.innerText=latePeriodText(fup,cal);
 
-  let total=0, dues=0;
+  let totalAmount=0;
+  let dues=0;
 
   for(let i=0;;i++){
     let due=addMonths(fup,i*interval);
@@ -227,36 +272,59 @@ function calc(){
     dues++;
     let I=monthsRounded15(due,cal);
     if(I<0) continue;
-    if(I===0){ total+=premium; continue; }
-    let J=Math.floor(I/6), K=I-6*J;
+    if(I===0){ totalAmount+=premium; continue; }
+    let J=Math.floor(I/6);
+    let K=I-6*J;
     let F=premium*Math.pow(1.05,J);
-    total+=F+(F*0.10/12*K);
+    totalAmount+=F+(F*0.10/12*K);
   }
 
   let totalPremium=dues*premium;
-  total=Math.round(total*10)/10;
-  let lateFee=Math.round((total-totalPremium)*10)/10;
+  totalAmount=Math.round(totalAmount*10)/10;
+  let lateFee=Math.round((totalAmount-totalPremium)*10)/10;
 
   o_dues.innerText=dues;
   o_premium.innerText="Rs. "+totalPremium.toFixed(2);
   o_latefee.innerText="Rs. "+lateFee.toFixed(2);
-  o_total.innerText="Rs. "+total.toFixed(2);
-  o_valid.innerText=fmt(new Date(cal.getTime()+14*86400000));
+  o_total.innerText="Rs. "+totalAmount.toFixed(2);
+  o_valid.innerText=fmt(validTill(fup,cal));
 }
 
 function downloadPDF(){
   const doc=new jsPDF();
   let y=20;
-  doc.text("Late Fee Calculator",105,y,{align:"center"}); y+=10;
-  [["Formated FUP",o_fup.innerText],["Calculation Date",o_cal.innerText],
-   ["Late Period",o_period.innerText],["No. of Dues o/s",o_dues.innerText],
-   ["Total Premium o/s",o_premium.innerText],["Late Fee o/s",o_latefee.innerText],
-   ["Total Amount Required",o_total.innerText],["Late Fee Valid Till",o_valid.innerText]
-  ].forEach(r=>{doc.text(r[0],20,y);doc.text(r[1],120,y);y+=8;});
+
+  doc.setFontSize(16);
+  doc.text("Late Fee Calculator",105,y,{align:"center"});
+  y+=8;
+  doc.setFontSize(10);
+  doc.text("Prepared by Subash Paudel for knowledge purpose",105,y,{align:"center"});
+  y+=12;
+
+  const rows=[
+    ["Formated FUP",o_fup.innerText],
+    ["Calculation Date",o_cal.innerText],
+    ["Late Period",o_period.innerText],
+    ["No. of Dues o/s",o_dues.innerText],
+    ["Total Premium o/s",o_premium.innerText],
+    ["Late Fee o/s",o_latefee.innerText],
+    ["Total Amount Required",o_total.innerText],
+    ["Late Fee Valid Till",o_valid.innerText]
+  ];
+
+  rows.forEach(r=>{
+    doc.text(r[0],20,y);
+    doc.text(r[1],120,y);
+    y+=8;
+  });
+
   doc.save("Late_Fee_Calculation.pdf");
 }
 
-document.querySelectorAll("input,select").forEach(e=>e.addEventListener("change",calc));
+document.querySelectorAll("input,select").forEach(e=>{
+  e.addEventListener("change",calc);
+});
 </script>
+
 </body>
 </html>
