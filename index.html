@@ -181,18 +181,22 @@ input,select{
     top:0;
     height:100%;
     display:flex;
-    align-items:center;     /* 🔑 perfect vertical centering */
+    align-items:center;        /* perfect vertical alignment */
+    font-size:15px;            /* 🔑 SAME as input text */
     font-weight:600;
     color:#555;
+    line-height:1;             /* prevent font stretching */
     pointer-events:none;
   }
 
-}
-
   .currency-input input{
-    padding-left:44px;
+    padding-left:44px;         /* space for Rs. */
+    font-size:15px;            /* 🔑 match Rs. exactly */
+    font-weight:600;
   }
 
+}
+  
   .row span:first-child{
     font-size:12px;
   }
@@ -387,5 +391,6 @@ function downloadPDF(){
 
 </body>
 </html>
+
 
 
