@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Late Fee Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -23,10 +24,10 @@ body{
 /* ================= DESKTOP BASE ================= */
 
 .card{
-  max-width:850px; /* Widened to accommodate three columns */
+  max-width:720px;
   margin:auto;
   background:#fff;
-  padding:20px;
+  padding:18px;
   border-radius:12px;
   box-shadow:0 6px 16px rgba(0,0,0,.15);
   border-top:8px solid var(--yellow);
@@ -65,46 +66,13 @@ input,select{
   box-sizing:border-box;
 }
 
-/* ================= OUTPUT SECTION (3-COLUMNS) ================= */
-
-.output-container {
-  display: grid;
-  grid-template-columns: 1fr 1.8fr 1fr; /* Photo | Results | Photo */
-  gap: 15px;
-  margin-top: 25px;
-  align-items: center;
-  display: none; /* Shown via JS calc() */
-}
-
 .output{
+  margin-top:22px;
   padding:16px;
   background:#fffbe6;
   border-radius:10px;
   border:2px solid var(--yellow);
-}
-
-.photo-side {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.photo-side img {
-  width: 100%;
-  max-width: 160px;
-  height: auto;
-  border-radius: 10px;
-  border: 2px solid var(--blue);
-  object-fit: cover;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.photo-caption {
-  font-size: 11px;
-  color: var(--blue);
-  margin-top: 6px;
-  font-weight: bold;
-  text-align: center;
+  display:none;
 }
 
 .output-title{
@@ -122,12 +90,35 @@ input,select{
   border-bottom:1px dashed #ccc;
 }
 
-.row span:first-child{ font-size:13px; }
-.value{ font-size:14px; font-weight:bold; }
-.big-value{ font-size:17px; font-weight:bold; }
-#o_dues{ font-size:18px; font-weight:bold; }
-#o_premium, #o_latefee, #o_total{ font-size:16px; font-weight:bold; }
-.latefee{ color:#b30000; }
+.row span:first-child{
+  font-size:13px; /* labels smaller */
+}
+
+.value{
+  font-size:14px; /* dates & period smaller */
+  font-weight:bold;
+}
+
+.big-value{
+  font-size:17px;
+  font-weight:bold;
+}
+
+#o_dues{
+  font-size:20px; /* keep same */
+  font-weight:bold;
+}
+
+#o_premium,
+#o_latefee,
+#o_total{
+  font-size:16px; /* same as formatted FUP size */
+  font-weight:bold;
+}
+
+.latefee{
+  color:#b30000;
+}
 
 .btn{
   margin-top:12px;
@@ -138,60 +129,73 @@ input,select{
   border-radius:6px;
   cursor:pointer;
   font-size:13px;
-  width: 100%;
 }
 
 .clear-btn{
   display:block;
   margin:10px 0 0 auto;
-  width: auto;
 }
 
-/* ================= MOBILE UI FIXES ================= */
+/* ================= MOBILE UI ================= */
 
-@media (max-width:650px){
-  body { background:#ffffff; padding: 10px; }
-  
-  /* Stack 3 columns into 1 on mobile */
-  .output-container {
-    grid-template-columns: 1fr;
+@media (max-width:600px){
+
+  body{
+    background:#ffffff;
   }
 
-  /* Control order: Results first, then photos */
-  .output { order: 1; }
-  .left-img { order: 2; margin-top: 15px; }
-  .right-img { order: 3; margin-top: 10px; }
-
-  /* Perfect Currency Alignment */
-  .currency-input {
-    position: relative;
-    display: flex;
-    align-items: center;
+  label{
+    color:var(--yellow);
+    font-weight:700;
+    font-size:14px;
   }
 
-  .currency-prefix {
-    position: absolute;
-    left: 12px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    font-size: 15px;
-    font-weight: 600;
-    color: #555;
-    pointer-events: none;
-    margin-top: 5px; /* Matches input's margin-top */
+  input, select{
+    width:100%;
+    height:44px;
+    font-size:15px;
+    border-radius:10px;
+    border:none;
+    padding:10px 12px;
+    background:#ffffff;
+    box-shadow:0 6px 14px rgba(0,0,0,0.15);
   }
 
-  .currency-input input {
-    padding-left: 45px !important;
-    font-size: 15px !important;
-    font-weight: 600;
+  input[type="date"]{
+    appearance:none;
+    -webkit-appearance:none;
   }
 
-  label {
-    color: var(--blue);
-    font-weight: 700;
-    font-size: 14px;
+  .currency-input{
+    position:relative;
+  }
+
+  .currency-prefix{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-weight:600;
+    color:#555;
+    pointer-events:none;
+  }
+
+  .currency-input input{
+    padding-left:44px;
+  }
+
+  .row span:first-child{
+    font-size:12px;
+  }
+
+  .value{
+    font-size:13px;
+  }
+
+  #o_premium,
+  #o_latefee,
+  #o_total{
+    font-size:14px;
   }
 }
 </style>
@@ -200,57 +204,49 @@ input,select{
 <body>
 
 <div class="card">
-  <h1>Late Fee Calculator</h1>
-  <div class="sub">Prepared by Subash Paudel, Testing Purpose</div>
 
-  <label>Due Date (FUP)</label>
-  <input type="date" id="fup">
+<h1>Late Fee Calculator</h1>
+<div class="sub">Prepared by Subash Paudel for knowledge purpose</div>
 
-  <label>Premium Amount</label>
-  <div class="currency-input">
-    <span class="currency-prefix">Rs.</span>
-    <input type="number" id="premium">
-  </div>
+<label>Due Date (FUP)</label>
+<input type="date" id="fup">
 
-  <label>Mode</label>
-  <select id="mode">
-    <option value="12">Yearly</option>
-    <option value="6">Half-Yearly</option>
-    <option value="3">Quarterly</option>
-    <option value="1">Monthly</option>
-  </select>
+<label>Premium Amount</label>
+<div class="currency-input">
+  <span class="currency-prefix">Rs.</span>
+  <input type="number" id="premium">
+</div>
 
-  <label>Calculation Date (Optional)</label>
-  <input type="date" id="caldate">
+<label>Mode</label>
+<select id="mode">
+  <option value="12">Yearly</option>
+  <option value="6">Half-Yearly</option>
+  <option value="3">Quarterly</option>
+  <option value="1">Monthly</option>
+</select>
 
-  <button class="btn clear-btn" onclick="clearAll()">Clear</button>
+<label>Calculation Date (Optional)</label>
+<input type="date" id="caldate">
 
-  <div class="output-container" id="outputBox">
-    
-    <div class="photo-side left-img">
-      <img src="left-photo.jpg" alt="Left Photo">
-      <div class="photo-caption">Subash Paudel</div>
-    </div>
+<button class="btn clear-btn" onclick="clearAll()">Clear</button>
 
-    <div class="output">
-      <div class="output-title">O/S Particulars</div>
-      <div class="row"><span>Formated FUP</span><span class="value" id="o_fup"></span></div>
-      <div class="row"><span>Calc. Date</span><span class="value" id="o_cal"></span></div>
-      <div class="row"><span>Late Period</span><span class="value" id="o_period"></span></div>
-      <div class="row"><span>Dues Count</span><span class="big-value" id="o_dues"></span></div>
-      <div class="row"><span>Total Premium</span><span class="big-value" id="o_premium"></span></div>
-      <div class="row"><span>Late Fee</span><span class="big-value latefee" id="o_latefee"></span></div>
-      <div class="row"><span>Total Req.</span><span class="big-value" id="o_total"></span></div>
-      <div class="row"><span>Valid Till</span><span class="value" id="o_valid"></span></div>
-      <button class="btn" onclick="downloadPDF()">Download PDF</button>
-    </div>
+<div class="output" id="outputBox">
+  <div class="output-title">Premium & Late Fee O/S Particulars</div>
 
-    <div class="photo-side right-img">
-      <img src="right-photo.jpg" alt="Right Photo">
-      <div class="photo-caption">Contact Designer</div>
-    </div>
+  <div class="row"><span>Formated FUP</span><span class="value" id="o_fup"></span></div>
+  <div class="row"><span>Calculation Date</span><span class="value" id="o_cal"></span></div>
+  <div class="row"><span>Late Period</span><span class="value" id="o_period"></span></div>
 
-  </div>
+  <div class="row"><span>No. of Dues o/s</span><span class="big-value" id="o_dues"></span></div>
+  <div class="row"><span>Total Premium o/s</span><span class="big-value" id="o_premium"></span></div>
+  <div class="row"><span>Late Fee o/s</span><span class="big-value latefee" id="o_latefee"></span></div>
+  <div class="row"><span>Total Amount Required</span><span class="big-value" id="o_total"></span></div>
+
+  <div class="row"><span>Late Fee Valid Till</span><span class="value" id="o_valid"></span></div>
+
+  <button class="btn" onclick="downloadPDF()">Download PDF</button>
+</div>
+
 </div>
 
 <script>
@@ -284,7 +280,7 @@ function latePeriodText(a,b){
   let d=d2.getDate()-d1.getDate();
   if(d<0){ m--; d+=new Date(d2.getFullYear(),d2.getMonth(),0).getDate(); }
   if(m<0){ y--; m+=12; }
-  return `${y}Y ${m}M ${d}D`;
+  return `${y} Years ${m} Months ${d} Days`;
 }
 
 function validTill(fup,cal){
@@ -296,21 +292,21 @@ function validTill(fup,cal){
 }
 
 function calc(){
-  let fupInput=document.getElementById("fup").value;
+  let fup=document.getElementById("fup").value;
   let premium=Number(document.getElementById("premium").value);
   let interval=Number(document.getElementById("mode").value);
-  let calInput=document.getElementById("caldate").value;
+  let cal=document.getElementById("caldate").value;
 
-  if(!fupInput || !premium) return;
+  if(!fup || !premium) return;
 
-  document.getElementById("outputBox").style.display="grid";
+  document.getElementById("outputBox").style.display="block";
 
-  let fup=new Date(fupInput);
-  let cal=calInput?new Date(calInput):new Date();
+  fup=new Date(fup);
+  cal=cal?new Date(cal):new Date();
 
-  document.getElementById("o_fup").innerText=fmt(fup);
-  document.getElementById("o_cal").innerText=fmt(cal);
-  document.getElementById("o_period").innerText=latePeriodText(fup,cal);
+  o_fup.innerText=fmt(fup);
+  o_cal.innerText=fmt(cal);
+  o_period.innerText=latePeriodText(fup,cal);
 
   let totalAmount=0;
   let dues=0;
@@ -334,11 +330,11 @@ function calc(){
   totalAmount=Math.round(totalAmount*10)/10;
   let lateFee=Math.round((totalAmount-totalPremium)*10)/10;
 
-  document.getElementById("o_dues").innerText=dues;
-  document.getElementById("o_premium").innerText="Rs. "+totalPremium.toLocaleString();
-  document.getElementById("o_latefee").innerText="Rs. "+lateFee.toLocaleString();
-  document.getElementById("o_total").innerText="Rs. "+totalAmount.toLocaleString();
-  document.getElementById("o_valid").innerText=fmt(validTill(fup,cal));
+  o_dues.innerText=dues;
+  o_premium.innerText="Rs. "+totalPremium.toFixed(2);
+  o_latefee.innerText="Rs. "+lateFee.toFixed(2);
+  o_total.innerText="Rs. "+totalAmount.toFixed(2);
+  o_valid.innerText=fmt(validTill(fup,cal));
 }
 
 function clearAll(){
@@ -353,31 +349,30 @@ document.querySelectorAll("input,select").forEach(e=>{
 function downloadPDF(){
   const doc=new jsPDF();
   let y=20;
+
   doc.setFontSize(16);
   doc.text("Late Fee Calculator",105,y,{align:"center"});
   y+=8;
   doc.setFontSize(10);
-  doc.text("Prepared by Subash Paudel",105,y,{align:"center"});
+  doc.text("Prepared by Subash Paudel for knowledge purpose",105,y,{align:"center"});
   y+=12;
 
-  const results = [
-    ["Formated FUP", document.getElementById("o_fup").innerText],
-    ["Calculation Date", document.getElementById("o_cal").innerText],
-    ["Late Period", document.getElementById("o_period").innerText],
-    ["Dues Count", document.getElementById("o_dues").innerText],
-    ["Total Premium", document.getElementById("o_premium").innerText],
-    ["Late Fee", document.getElementById("o_latefee").innerText],
-    ["Total Amount", document.getElementById("o_total").innerText],
-    ["Valid Till", document.getElementById("o_valid").innerText]
-  ];
-
-  results.forEach(r=>{
+  [
+    ["Formated FUP",o_fup.innerText],
+    ["Calculation Date",o_cal.innerText],
+    ["Late Period",o_period.innerText],
+    ["No. of Dues o/s",o_dues.innerText],
+    ["Total Premium o/s",o_premium.innerText],
+    ["Late Fee o/s",o_latefee.innerText],
+    ["Total Amount Required",o_total.innerText],
+    ["Late Fee Valid Till",o_valid.innerText]
+  ].forEach(r=>{
     doc.text(r[0],20,y);
     doc.text(r[1],120,y);
     y+=8;
   });
 
-  doc.save("Calculation_Report.pdf");
+  doc.save("Late_Fee_Calculation.pdf");
 }
 </script>
 
