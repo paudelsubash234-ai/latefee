@@ -76,7 +76,7 @@ input,select{
 }
 
 .output-title{
-  text-align:left;
+  text-align:center;
   font-weight:bold;
   color:var(--blue);
   margin-bottom:12px;
@@ -105,7 +105,7 @@ input,select{
 }
 
 #o_dues{
-  font-size:20px; /* keep same */
+  font-size:18px; /* keep same */
   font-weight:bold;
 }
 
@@ -173,15 +173,21 @@ input,select{
     position:relative;
   }
 
+@media (max-width:600px){
+
   .currency-prefix{
     position:absolute;
     left:14px;
-    top:50%;
-    transform:translateY(-50%);
+    top:0;
+    height:100%;
+    display:flex;
+    align-items:center;     /* 🔑 perfect vertical centering */
     font-weight:600;
     color:#555;
     pointer-events:none;
   }
+
+}
 
   .currency-input input{
     padding-left:44px;
@@ -209,7 +215,7 @@ input,select{
 <div class="card">
 
 <h1>Late Fee Calculator</h1>
-<div class="sub">Prepared by Subash Paudel for knowledge purpose</div>
+<div class="sub">Prepared by Subash Paudel, Testing Purpose</div>
 
 <label>Due Date (FUP)</label>
 <input type="date" id="fup">
@@ -381,4 +387,5 @@ function downloadPDF(){
 
 </body>
 </html>
+
 
