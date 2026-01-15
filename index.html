@@ -21,13 +21,13 @@ body{
   padding:20px;
 }
 
-/* ================= DESKTOP BASE (UNCHANGED) ================= */
+/* ================= DESKTOP BASE ================= */
 
 .card{
-  max-width:760px;
+  max-width:720px;
   margin:auto;
   background:#fff;
-  padding:25px;
+  padding:18px;
   border-radius:12px;
   box-shadow:0 6px 16px rgba(0,0,0,.15);
   border-top:8px solid var(--yellow);
@@ -37,34 +37,38 @@ h1{
   margin:0;
   color:var(--blue);
   text-align:center;
+  font-size:22px;
 }
 
 .sub{
   text-align:center;
-  font-size:12px;
+  font-size:11px;
   color:#555;
-  margin-bottom:25px;
+  margin-bottom:18px;
 }
 
 label{
   font-weight:bold;
-  margin-top:14px;
+  margin-top:12px;
   display:block;
   color:var(--blue);
+  font-size:13px;
 }
 
 input,select{
   width:100%;
-  padding:10px;
-  margin-top:6px;
-  font-size:15px;
+  height:38px;
+  padding:8px;
+  margin-top:5px;
+  font-size:13px;
   border:1px solid #aaa;
   border-radius:6px;
+  box-sizing:border-box;
 }
 
 .output{
-  margin-top:30px;
-  padding:20px;
+  margin-top:22px;
+  padding:16px;
   background:#fffbe6;
   border-radius:10px;
   border:2px solid var(--yellow);
@@ -75,61 +79,86 @@ input,select{
   text-align:center;
   font-weight:bold;
   color:var(--blue);
-  margin-bottom:15px;
-  font-size:18px;
+  margin-bottom:12px;
+  font-size:16px;
 }
 
 .row{
   display:flex;
   justify-content:space-between;
-  padding:9px 0;
+  padding:7px 0;
   border-bottom:1px dashed #ccc;
 }
 
+.row span:first-child{
+  font-size:13px; /* labels smaller */
+}
+
 .value{
-  font-size:16px;
+  font-size:14px; /* dates & period smaller */
   font-weight:bold;
 }
 
 .big-value{
-  font-size:20px;
+  font-size:17px;
+  font-weight:bold;
+}
+
+#o_dues{
+  font-size:20px; /* keep same */
+  font-weight:bold;
+}
+
+#o_premium,
+#o_latefee,
+#o_total{
+  font-size:16px; /* same as formatted FUP size */
   font-weight:bold;
 }
 
 .latefee{
   color:#b30000;
-  font-weight:bold;
 }
 
 .btn{
-  margin-top:15px;
-  padding:10px 15px;
+  margin-top:12px;
+  padding:8px 14px;
   background:var(--blue);
   color:#fff;
   border:none;
   border-radius:6px;
   cursor:pointer;
+  font-size:13px;
 }
 
-/* ================= MOBILE UI (APP STYLE) ================= */
+.clear-btn{
+  display:block;
+  margin:10px 0 0 auto;
+}
+
+/* ================= MOBILE UI ================= */
 
 @media (max-width:600px){
 
+  body{
+    background:#ffffff;
+  }
+
   label{
-    color:#f4c430;
+    color:var(--yellow);
     font-weight:700;
     font-size:14px;
   }
 
   input, select{
     width:100%;
-    height:50px;
-    font-size:16px;
-    border-radius:12px;
+    height:44px;
+    font-size:15px;
+    border-radius:10px;
     border:none;
-    padding:14px;
+    padding:10px 12px;
     background:#ffffff;
-    box-shadow:0 8px 18px rgba(0,0,0,0.12);
+    box-shadow:0 6px 14px rgba(0,0,0,0.15);
   }
 
   input[type="date"]{
@@ -143,16 +172,30 @@ input,select{
 
   .currency-prefix{
     position:absolute;
-    left:16px;
+    left:14px;
     top:50%;
     transform:translateY(-50%);
     font-weight:600;
-    color:#777;
+    color:#555;
     pointer-events:none;
   }
 
   .currency-input input{
-    padding-left:48px;
+    padding-left:44px;
+  }
+
+  .row span:first-child{
+    font-size:12px;
+  }
+
+  .value{
+    font-size:13px;
+  }
+
+  #o_premium,
+  #o_latefee,
+  #o_total{
+    font-size:14px;
   }
 }
 </style>
@@ -184,6 +227,8 @@ input,select{
 
 <label>Calculation Date (Optional)</label>
 <input type="date" id="caldate">
+
+<button class="btn clear-btn" onclick="clearAll()">Clear</button>
 
 <div class="output" id="outputBox">
   <div class="output-title">Premium & Late Fee O/S Particulars</div>
@@ -269,10 +314,12 @@ function calc(){
   for(let i=0;;i++){
     let due=addMonths(fup,i*interval);
     if(due>cal) break;
+
     dues++;
     let I=monthsRounded15(due,cal);
     if(I<0) continue;
     if(I===0){ totalAmount+=premium; continue; }
+
     let J=Math.floor(I/6);
     let K=I-6*J;
     let F=premium*Math.pow(1.05,J);
@@ -290,6 +337,15 @@ function calc(){
   o_valid.innerText=fmt(validTill(fup,cal));
 }
 
+function clearAll(){
+  document.querySelectorAll("input,select").forEach(e=>e.value="");
+  document.getElementById("outputBox").style.display="none";
+}
+
+document.querySelectorAll("input,select").forEach(e=>{
+  e.addEventListener("change",calc);
+});
+
 function downloadPDF(){
   const doc=new jsPDF();
   let y=20;
@@ -301,7 +357,7 @@ function downloadPDF(){
   doc.text("Prepared by Subash Paudel for knowledge purpose",105,y,{align:"center"});
   y+=12;
 
-  const rows=[
+  [
     ["Formated FUP",o_fup.innerText],
     ["Calculation Date",o_cal.innerText],
     ["Late Period",o_period.innerText],
@@ -310,9 +366,7 @@ function downloadPDF(){
     ["Late Fee o/s",o_latefee.innerText],
     ["Total Amount Required",o_total.innerText],
     ["Late Fee Valid Till",o_valid.innerText]
-  ];
-
-  rows.forEach(r=>{
+  ].forEach(r=>{
     doc.text(r[0],20,y);
     doc.text(r[1],120,y);
     y+=8;
@@ -320,10 +374,6 @@ function downloadPDF(){
 
   doc.save("Late_Fee_Calculation.pdf");
 }
-
-document.querySelectorAll("input,select").forEach(e=>{
-  e.addEventListener("change",calc);
-});
 </script>
 
 </body>
