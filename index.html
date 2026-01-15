@@ -76,7 +76,7 @@ input,select{
 }
 
 .output-title{
-  text-align:center;
+  text-align:left;
   font-weight:bold;
   color:var(--blue);
   margin-bottom:12px;
@@ -150,16 +150,19 @@ input,select{
     font-size:14px;
   }
 
-  input, select{
-    width:100%;
-    height:44px;
-    font-size:15px;
-    border-radius:10px;
-    border:none;
-    padding:10px 12px;
-    background:#ffffff;
-    box-shadow:0 6px 14px rgba(0,0,0,0.15);
+  @media (max-width:600px){
+
+  /* Force 3D look for Mode (select) */
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+
+    background-color:#ffffff;
+    box-shadow:0 8px 18px rgba(0,0,0,0.18);
   }
+
+}
 
   input[type="date"]{
     appearance:none;
@@ -378,3 +381,4 @@ function downloadPDF(){
 
 </body>
 </html>
+
