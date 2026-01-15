@@ -5,7 +5,6 @@
 <title>Late Fee Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -55,6 +54,7 @@ label{
   font-size:13px;
 }
 
+/* Base style for inputs & select */
 input, select {
   width: 100%;
   height: 44px;
@@ -66,25 +66,35 @@ input, select {
   box-sizing: border-box;
   margin-top: 5px;
   margin-bottom: 15px;
-
-  /* --- LEFT ALIGNMENT FIX FOR DATES --- */
-  display: flex;
-  align-items: center;
-  justify-content: flex-start; /* Forces content to the left */
-  text-align: left;           /* Standard left alignment */
-  
-  /* --- 3D SHADOW & BROWSER UNLOCK --- */
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  
+  /* LEFT ALIGNMENT */
+  text-align: left;
 }
 
-/* Ensure the text inside the date picker stays left on iOS */
+/* FORCING DATE ALIGNMENT (CRITICAL) */
+input[type="date"] {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 input[type="date"]::-webkit-date-and-time-value {
   text-align: left;
-  margin-left: 0;
+  margin: 0;
+  width: 100%;
 }
+
+/* CUSTOM DROPDOWN ARROW */
+select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/00/svg' viewBox='0 0 24 24' fill='none' stroke='%230b3c5d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 14px;
+  padding-right: 40px !important;
 }
 
 .output{
@@ -109,14 +119,15 @@ input[type="date"]::-webkit-date-and-time-value {
   justify-content:space-between;
   padding:7px 0;
   border-bottom:1px dashed #ccc;
+  align-items: center;
 }
 
 .row span:first-child{
-  font-size:13px; /* labels smaller */
+  font-size:13px;
 }
 
 .value{
-  font-size:14px; /* dates & period smaller */
+  font-size:14px;
   font-weight:bold;
 }
 
@@ -126,14 +137,15 @@ input[type="date"]::-webkit-date-and-time-value {
 }
 
 #o_dues{
-  font-size:20px; /* keep same */
+  font-size:20px;
   font-weight:bold;
+  line-height: 1; /* Prevents height stretch */
 }
 
 #o_premium,
 #o_latefee,
 #o_total{
-  font-size:16px; /* same as formatted FUP size */
+  font-size:16px;
   font-weight:bold;
 }
 
@@ -150,17 +162,18 @@ input[type="date"]::-webkit-date-and-time-value {
   border-radius:6px;
   cursor:pointer;
   font-size:13px;
+  width: 100%;
 }
 
 .clear-btn{
   display:block;
   margin:10px 0 0 auto;
+  width: auto;
 }
 
 /* ================= MOBILE UI ================= */
 
 @media (max-width:600px){
-
   body{
     background:#ffffff;
   }
@@ -169,43 +182,6 @@ input[type="date"]::-webkit-date-and-time-value {
     color:var(--yellow);
     font-weight:700;
     font-size:14px;
-  }
-
- /* REPLACE YOUR OLD input, select BLOCK WITH THIS: */
-input, select {
-  width: 100%;
-  height: 44px;
-  font-size: 15px;
-  border-radius: 10px;
-  border: 1px solid #eee; /* Added a very light border to define the 3D edge */
-  padding: 10px 12px;
-  background: #ffffff;
-  box-sizing: border-box;
-  display: block;
-  margin-top: 5px;
-  margin-bottom: 15px; /* Adds space so the shadow isn't hidden by the next box */
-  
-  /* THIS PART FIXES THE MODE SHADOW */
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  
-  /* THE 3D SHADOW */
-  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-}
-
-/* Because 'appearance: none' removes the arrow, we add a custom one back */
-select {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/00/svg' viewBox='0 0 24 24' fill='none' stroke='%230b3c5d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 15px center;
-  background-size: 14px;
-  padding-right: 40px !important;
-}
-
-  input[type="date"]{
-    appearance:none;
-    -webkit-appearance:none;
   }
 
   .currency-input{
@@ -220,6 +196,8 @@ select {
     font-weight:600;
     color:#555;
     pointer-events:none;
+    z-index: 5;
+    margin-top: -5px; /* Adjusting for input margin */
   }
 
   .currency-input input{
@@ -246,7 +224,6 @@ select {
 <body>
 
 <div class="card">
-
 <h1>Late Fee Calculator</h1>
 <div class="sub">Prepared by Subash Paudel for knowledge purpose</div>
 
@@ -334,21 +311,21 @@ function validTill(fup,cal){
 }
 
 function calc(){
-  let fup=document.getElementById("fup").value;
+  let fupVal=document.getElementById("fup").value;
   let premium=Number(document.getElementById("premium").value);
   let interval=Number(document.getElementById("mode").value);
-  let cal=document.getElementById("caldate").value;
+  let calVal=document.getElementById("caldate").value;
 
-  if(!fup || !premium) return;
+  if(!fupVal || !premium) return;
 
   document.getElementById("outputBox").style.display="block";
 
-  fup=new Date(fup);
-  cal=cal?new Date(cal):new Date();
+  let fup=new Date(fupVal);
+  let cal=calVal?new Date(calVal):new Date();
 
-  o_fup.innerText=fmt(fup);
-  o_cal.innerText=fmt(cal);
-  o_period.innerText=latePeriodText(fup,cal);
+  document.getElementById("o_fup").innerText=fmt(fup);
+  document.getElementById("o_cal").innerText=fmt(cal);
+  document.getElementById("o_period").innerText=latePeriodText(fup,cal);
 
   let totalAmount=0;
   let dues=0;
@@ -372,11 +349,11 @@ function calc(){
   totalAmount=Math.round(totalAmount*10)/10;
   let lateFee=Math.round((totalAmount-totalPremium)*10)/10;
 
-  o_dues.innerText=dues;
-  o_premium.innerText="Rs. "+totalPremium.toFixed(2);
-  o_latefee.innerText="Rs. "+lateFee.toFixed(2);
-  o_total.innerText="Rs. "+totalAmount.toFixed(2);
-  o_valid.innerText=fmt(validTill(fup,cal));
+  document.getElementById("o_dues").innerText=dues;
+  document.getElementById("o_premium").innerText="Rs. "+totalPremium.toFixed(2);
+  document.getElementById("o_latefee").innerText="Rs. "+lateFee.toFixed(2);
+  document.getElementById("o_total").innerText="Rs. "+totalAmount.toFixed(2);
+  document.getElementById("o_valid").innerText=fmt(validTill(fup,cal));
 }
 
 function clearAll(){
@@ -400,14 +377,14 @@ function downloadPDF(){
   y+=12;
 
   [
-    ["Formated FUP",o_fup.innerText],
-    ["Calculation Date",o_cal.innerText],
-    ["Late Period",o_period.innerText],
-    ["No. of Dues o/s",o_dues.innerText],
-    ["Total Premium o/s",o_premium.innerText],
-    ["Late Fee o/s",o_latefee.innerText],
-    ["Total Amount Required",o_total.innerText],
-    ["Late Fee Valid Till",o_valid.innerText]
+    ["Formated FUP", document.getElementById("o_fup").innerText],
+    ["Calculation Date", document.getElementById("o_cal").innerText],
+    ["Late Period", document.getElementById("o_period").innerText],
+    ["No. of Dues o/s", document.getElementById("o_dues").innerText],
+    ["Total Premium o/s", document.getElementById("o_premium").innerText],
+    ["Late Fee o/s", document.getElementById("o_latefee").innerText],
+    ["Total Amount Required", document.getElementById("o_total").innerText],
+    ["Late Fee Valid Till", document.getElementById("o_valid").innerText]
   ].forEach(r=>{
     doc.text(r[0],20,y);
     doc.text(r[1],120,y);
@@ -420,5 +397,3 @@ function downloadPDF(){
 
 </body>
 </html>
-
-
