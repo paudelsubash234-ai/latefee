@@ -5,7 +5,7 @@
 <title>Late Fee Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- jsPDF CDN -->
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -17,7 +17,7 @@
 
 body{
   font-family: Arial, sans-serif;
-  background: var(--light);
+  background:var(--light);
   padding:20px;
 }
 
@@ -84,16 +84,22 @@ input,select{
   border-bottom:1px dashed #ccc;
 }
 
+/* normal values (dates & period) */
 .value{
   font-size:16px;
-}
-
-.bold{
   font-weight:bold;
 }
 
+/* bigger financial values */
+.big-value{
+  font-size:20px;
+  font-weight:bold;
+}
+
+/* late fee highlight */
 .latefee{
   color:#b30000;
+  font-weight:bold;
 }
 
 .btn{
@@ -104,11 +110,6 @@ input,select{
   border:none;
   border-radius:6px;
   cursor:pointer;
-  font-size:14px;
-}
-
-.btn:hover{
-  background:#092f48;
 }
 </style>
 </head>
@@ -142,10 +143,12 @@ input,select{
   <div class="row"><span>Formated FUP</span><span class="value" id="o_fup"></span></div>
   <div class="row"><span>Calculation Date</span><span class="value" id="o_cal"></span></div>
   <div class="row"><span>Late Period</span><span class="value" id="o_period"></span></div>
-  <div class="row"><span>No. of Dues o/s</span><span class="value" id="o_dues"></span></div>
-  <div class="row"><span>Total Premium o/s</span><span class="value" id="o_premium"></span></div>
-  <div class="row"><span>Late Fee o/s</span><span class="value latefee" id="o_latefee"></span></div>
-  <div class="row"><span>Total Amount Required</span><span class="value bold" id="o_total"></span></div>
+
+  <div class="row"><span>No. of Dues o/s</span><span class="big-value" id="o_dues"></span></div>
+  <div class="row"><span>Total Premium o/s</span><span class="big-value" id="o_premium"></span></div>
+  <div class="row"><span>Late Fee o/s</span><span class="big-value latefee" id="o_latefee"></span></div>
+  <div class="row"><span>Total Amount Required</span><span class="big-value" id="o_total"></span></div>
+
   <div class="row"><span>Late Fee Valid Till</span><span class="value" id="o_valid"></span></div>
 
   <button class="btn" onclick="downloadPDF()">Download PDF</button>
@@ -212,16 +215,16 @@ function calc(){
   document.getElementById("o_cal").innerText=fmt(cal);
   document.getElementById("o_period").innerText=latePeriodText(fup,cal);
 
-  let totalMonths=(cal.getFullYear()-fup.getFullYear())*12+(cal.getMonth()-fup.getMonth());
-  let dues=Math.floor(totalMonths/interval)+1;
-  if(dues<0) dues=0;
-
-  let totalPremium=dues*premium;
   let totalAmount=0;
+  let dues=0;
 
-  for(let i=0;i<dues;i++){
+  for(let i=0;;i++){
     let due=addMonths(fup,i*interval);
+    if(due>cal) break;
+
+    dues++;
     let I=monthsRounded15(due,cal);
+
     if(I<0) continue;
     if(I===0){ totalAmount+=premium; continue; }
 
@@ -231,6 +234,7 @@ function calc(){
     totalAmount+=F+(F*0.10/12*K);
   }
 
+  let totalPremium=dues*premium;
   totalAmount=Math.round(totalAmount*10)/10;
   let lateFee=Math.round((totalAmount-totalPremium)*10)/10;
 
@@ -248,14 +252,9 @@ function downloadPDF(){
   doc.setFontSize(16);
   doc.text("Late Fee Calculator",105,y,{align:"center"});
   y+=8;
-
   doc.setFontSize(10);
   doc.text("Prepared by Subash Paudel for knowledge purpose",105,y,{align:"center"});
   y+=12;
-
-  doc.setFontSize(12);
-  doc.text("Premium & Late Fee O/S Particulars",20,y);
-  y+=8;
 
   const rows=[
     ["Formated FUP",o_fup.innerText],
