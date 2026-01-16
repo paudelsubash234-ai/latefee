@@ -356,9 +356,18 @@ function calc(){
   document.getElementById("o_valid").innerText=fmt(validTill(fup,cal));
 }
 
-function clearAll(){
-  document.querySelectorAll("input,select").forEach(e=>e.value="");
-  document.getElementById("outputBox").style.display="none";
+function clearAll() {
+  // 1. Clear the inputs
+  document.getElementById("fup").value = "";
+  document.getElementById("premium").value = "";
+  document.getElementById("caldate").value = "";
+
+  // 2. IMPORTANT: Reset Mode to "12" instead of making it empty
+  // This prevents the "unresponsive/freeze" error you were seeing
+  document.getElementById("mode").value = "12";
+
+  // 3. Hide the output box since there's no data
+  document.getElementById("outputBox").style.display = "none";
 }
 
 document.querySelectorAll("input,select").forEach(e=>{
@@ -397,3 +406,4 @@ function downloadPDF(){
 
 </body>
 </html>
+
