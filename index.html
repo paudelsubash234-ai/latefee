@@ -501,9 +501,10 @@ populateSelect('cal-year',  years, null, today.getFullYear());
 populateSelect('cal-month', [...Array(12).keys()], MONTHS, today.getMonth());
 populateSelect('cal-day',   days31, null, today.getDate());
 
-// Mode
-let paymentMode = null;
+// Mode — default: Yearly
+let paymentMode = 'yearly';
 document.querySelectorAll('.mode-pill').forEach(btn => {
+  if (btn.dataset.mode === 'yearly') btn.classList.add('active');
   btn.addEventListener('click', () => {
     document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -705,9 +706,10 @@ function resetAll() {
   document.getElementById('cal-month').value=today.getMonth();
   document.getElementById('cal-day').value=today.getDate();
 
-  // Clear mode
+  // Reset mode to Yearly
   document.querySelectorAll('.mode-pill').forEach(b=>b.classList.remove('active'));
-  paymentMode=null;
+  document.querySelector('[data-mode="yearly"]').classList.add('active');
+  paymentMode='yearly';
 
   // Hide results
   document.getElementById('empty-state').style.display='flex';
