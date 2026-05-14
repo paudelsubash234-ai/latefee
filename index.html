@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
 <title>LateFee Settlement — Nepal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -25,18 +25,19 @@
   --green:   #34D399;
 }
 
-html { scroll-behavior: smooth; height: -webkit-fill-available; }
+html { scroll-behavior: smooth; height: 100%; background: #07070A; }
 
-body { overscroll-behavior-y: none; }
+
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Outfit', sans-serif;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
 }
 
 /* NAV */
